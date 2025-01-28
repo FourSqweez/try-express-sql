@@ -33,29 +33,28 @@ app.get("/testdb", async (req, res) => {
 });
 
 // path = GET /users
-app.get("/users", (req, res) => {
-  const filterUsers = users.map((user) => {
-    return {
-      id: user.id,
-      firstname: user.firstname,
-      lastname: user.lastname,
-      fullname: user.firstname + " " + user.lastname,
-    };
-  });
-  res.json(filterUsers);
+app.get("/users", async (req, res) => {
+  const results = await conn.query("SELECT * FROM users");
+  console.log("results", results);
+  res.json(results[0]);
 });
 
 // path = POST /user
-app.post("/user", (req, res) => {
-  let user = req.body;
-  user.id = counter;
-  counter += 1;
-  console.log("user : ", user);
-  users.push(user);
-  res.json({
-    message: "add ok",
-    user: user,
-  });
+app.post("/user", async (req, res) => {
+  try {
+    let user = req.body;
+    const result = await conn.query("INSERT INTO users SET ?", user);
+
+    res.json({
+      message: "add ok",
+      data: result[0],
+    });
+  } catch (error) {
+    console.log("error message", error.message);
+    res.status(500).json({
+      message: "something went wrong",
+    });
+  }
 });
 
 // get user by id
