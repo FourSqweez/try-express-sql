@@ -58,10 +58,22 @@ app.post("/user", async (req, res) => {
 });
 
 // get user by id
-app.get("/users/:id", (req, res) => {
-  let id = req.params.id;
-  let selectedIndex = users.findIndex((user) => user.id == id);
-  res.json(users[selectedIndex]);
+app.get("/users/:id", async (req, res) => {
+  try {
+    let id = req.params.id;
+    const results = await conn.query("SELECT * FROM users WHERE id = ?", id);
+
+    if (results[0].length === 0) {
+      throw { statusCode: 404, message: "User not found" };
+    }
+    res.json(results[0][0]);
+  } catch (error) {
+    console.log("error message", error.message);
+    let statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      message: "something went wrong",
+    });
+  }
 });
 
 // path = PUT /user/:id
