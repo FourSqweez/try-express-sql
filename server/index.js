@@ -8,9 +8,6 @@ app.use(bodyparser.json());
 app.use(cors());
 
 const port = 8000;
-
-let users = [];
-let counter = 1;
 let conn = null;
 
 const initMySQL = async () => {
