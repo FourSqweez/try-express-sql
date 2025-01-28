@@ -77,29 +77,25 @@ app.get("/users/:id", async (req, res) => {
 });
 
 // path = PUT /user/:id
-app.patch("/user/:id", (req, res) => {
-  let id = req.params.id;
-  let updateUser = req.body;
+app.put("/users/:id", async (req, res) => {
+  try {
+    let id = req.params.id;
+    let updateUser = req.body;
+    const result = await conn.query("UPDATE users SET ? WHERE id = ?", [
+      updateUser,
+      id,
+    ]);
 
-  // find user from id
-  let selectedIndex = users.findIndex((user) => user.id == id);
-
-  // update the user
-  if (updateUser.firstname) {
-    users[selectedIndex].firstname = updateUser.firstname;
+    res.json({
+      message: "update ok",
+      data: result[0],
+    });
+  } catch (error) {
+    console.log("error message", error.message);
+    res.status(500).json({
+      message: "something went wrong",
+    });
   }
-  if (updateUser.lastname) {
-    users[selectedIndex].lastname = updateUser.lastname;
-  }
-
-  // put the new update user to the same user
-  res.json({
-    message: "update user complete!",
-    data: {
-      user: updateUser,
-      indexUpdate: selectedIndex,
-    },
-  });
 });
 
 // path DELETE/users/:id
