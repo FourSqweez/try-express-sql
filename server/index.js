@@ -2,8 +2,10 @@ const express = require("express");
 const bodyparser = require("body-parser");
 const app = express();
 const mysql = require("mysql2/promise");
+const cors = require("cors");
 
 app.use(bodyparser.json());
+app.use(cors());
 
 const port = 8000;
 
@@ -99,16 +101,21 @@ app.put("/users/:id", async (req, res) => {
 });
 
 // path DELETE/users/:id
-app.delete("/user/:id", (req, res) => {
-  let id = req.params.id;
-  let selectedIndex = users.findIndex((user) => user.id == id);
+app.delete("/user/:id", async (req, res) => {
+  try {
+    let id = req.params.id;
+    const result = await conn.query("DELETE from users WHERE id = ?", id);
 
-  users.splice(selectedIndex, 1);
-
-  res.json({
-    message: "delete complete!",
-    indexDeleted: selectedIndex,
-  });
+    res.json({
+      message: "delete ok",
+      data: result[0],
+    });
+  } catch (error) {
+    console.log("error message", error.message);
+    res.status(500).json({
+      message: "something went wrong",
+    });
+  }
 });
 
 app.listen(port, async (req, res) => {
