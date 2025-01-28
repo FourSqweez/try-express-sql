@@ -33,6 +33,24 @@ app.get("/testdb", (req, res) => {
     });
 });
 
+app.get("/testdb-new", async (req, res) => {
+  try {
+    const conn = await mysql.createConnection({
+      host: "localhost",
+      user: "root",
+      password: "root",
+      database: "tutorial",
+      port: 8889,
+    });
+
+    const results = await conn.query("SELECT * FROM users");
+    res.json(results[0]);
+  } catch (error) {
+    console.error("Error fetching users:", error.message);
+    res.status(500).json({ error: "Error fetching users" });
+  }
+});
+
 // path = GET /users
 app.get("/users", (req, res) => {
   const filterUsers = users.map((user) => {
