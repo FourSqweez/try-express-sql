@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyparser = require("body-parser");
 const app = express();
+const mysql = require("mysql2/promise");
 
 app.use(bodyparser.json());
 
@@ -8,6 +9,29 @@ const port = 8000;
 
 let users = [];
 let counter = 1;
+
+// Route handler for getting all users from database
+app.get("/testdb", (req, res) => {
+  mysql
+    .createConnection({
+      host: "localhost",
+      user: "root",
+      password: "root",
+      database: "tutorial",
+      port: 8889,
+    })
+    .then((conn) => {
+      conn
+        .query("SELECT * FROM users")
+        .then((results) => {
+          res.json(results[0]);
+        })
+        .catch((error) => {
+          console.error("Error fetching users:", error.message);
+          res.status(500).json({ error: "Error fetching users" });
+        });
+    });
+});
 
 // path = GET /users
 app.get("/users", (req, res) => {
