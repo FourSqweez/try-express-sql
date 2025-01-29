@@ -20,6 +20,30 @@ const initMySQL = async () => {
   });
 };
 
+const validateData = (userData) => {
+  let errors = [];
+  if (!userData.firstname) {
+    errors.push("First name is required");
+  }
+  if (!userData.lastname) {
+    errors.push("Last name is required");
+  }
+  if (!userData.age) {
+    errors.push("Age is required");
+  }
+  if (!userData.gender) {
+    errors.push("Gender is required");
+  }
+  if (!userData.interests) {
+    errors.push("Interest is required");
+  }
+  if (!userData.description) {
+    errors.push("Description is required");
+  }
+
+  return errors;
+};
+
 // Route handler for getting all users from database
 app.get("/testdb", async (req, res) => {
   try {
@@ -42,6 +66,15 @@ app.get("/users", async (req, res) => {
 app.post("/user", async (req, res) => {
   try {
     let user = req.body;
+
+    const errors = validateData(user);
+    console.log("error : ", errors);
+    if (errors.length > 0) {
+      throw {
+        message: "Please fill in the required fields",
+        errors,
+      };
+    }
     const result = await conn.query("INSERT INTO users SET ?", user);
 
     res.json({
@@ -49,9 +82,12 @@ app.post("/user", async (req, res) => {
       data: result[0],
     });
   } catch (error) {
-    console.log("error message", error.message);
+    const errorMessage = error.message || "something went wrong";
+    const errors = error.errors || [];
+    console.log("error ", error);
     res.status(500).json({
-      message: "something went wrong",
+      message: errorMessage,
+      errors,
     });
   }
 });
