@@ -56,10 +56,14 @@ const submitData = async () => {
 
     const errors = validateData(userData);
     if (errors.length > 0) {
+      // error from client
       throw {
         message: "Please fill in the required fields",
         errors,
       };
+      // after trowing error, the code below will not be executed
+      // it will go to catch block
+      // which means it will not send request to server
     }
 
     const response = await axios.post("http://localhost:8000/user", userData);
@@ -67,9 +71,12 @@ const submitData = async () => {
     messageDOM.innerHTML = "Submitted successfully";
     messageDOM.className = "message success";
   } catch (error) {
-    // if (error.response) {
-    //   console.log("Error submitting data:", error.response.data.message);
-    // }
+    if (error.response) {
+      // error from server
+      console.log("Error submitting data:", error.response);
+      error.message = error.response.data.message;
+      error.errors = error.response.data.errors;
+    }
 
     let htmlData = "<div>";
     htmlData += `<div>${error.message}</div>`;
