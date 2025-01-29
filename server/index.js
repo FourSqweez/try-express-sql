@@ -112,7 +112,7 @@ app.get("/users/:id", async (req, res) => {
 });
 
 // path = PUT /user/:id
-app.put("/users/:id", async (req, res) => {
+app.put("/user/:id", async (req, res) => {
   try {
     let id = req.params.id;
     let updateUser = req.body;

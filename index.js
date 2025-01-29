@@ -1,3 +1,50 @@
+const BASE_URL = "http://localhost:8000";
+let mode = "CREATE"; // CREATE or EDIT
+let selectedUserId = "";
+
+window.onload = async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get("id");
+  console.log("id", id);
+  if (id) {
+    mode = "EDIT";
+    selectedUserId = id;
+
+    // 1. load user data
+    try {
+      const response = await axios.get(`${BASE_URL}/users/${id}`);
+      const user = response.data;
+
+      // 2. put the old data into the form
+      let firstNameDOM = document.querySelector("input[name=firstname]");
+      let lastNameDOM = document.querySelector("input[name=lastname]");
+      let ageDOM = document.querySelector("input[name=age]");
+      let descriptionDOM = document.querySelector("textarea[name=description]");
+
+      firstNameDOM.value = user.firstname;
+      lastNameDOM.value = user.lastname;
+      ageDOM.value = user.age;
+      descriptionDOM.value = user.description;
+
+      let genderDOMs = document.querySelectorAll("input[name=gender]");
+      for (let i = 0; i < genderDOMs.length; i++) {
+        if (genderDOMs[i].value == user.gender) {
+          genderDOMs[i].checked = true;
+        }
+      }
+
+      let interestDOMs = document.querySelectorAll("input[name=interest]");
+      for (let i = 0; i < interestDOMs.length; i++) {
+        if (user.interests.includes(interestDOMs[i].value)) {
+          interestDOMs[i].checked = true;
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+};
+
 const validateData = (userData) => {
   let errors = [];
   if (!userData.firstname) {
@@ -66,9 +113,23 @@ const submitData = async () => {
       // which means it will not send request to server
     }
 
-    const response = await axios.post("http://localhost:8000/user", userData);
-    console.log("response", response.data);
-    messageDOM.innerHTML = "Submitted successfully";
+    let message = "Create new user successfully";
+
+    if (mode === "CREATE") {
+      // create new user
+      const response = await axios.post(`${BASE_URL}/user`, userData);
+      console.log("response", response);
+    } else {
+      // edit user
+      const response = await axios.put(
+        `${BASE_URL}/user/${selectedUserId}`,
+        userData
+      );
+      message = "Edit user successfully";
+      console.log("response", response);
+    }
+
+    messageDOM.innerHTML = message;
     messageDOM.className = "message success";
   } catch (error) {
     if (error.response) {
